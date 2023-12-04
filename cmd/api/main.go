@@ -1,26 +1,20 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
+	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/router"
-	"github.com/vexxhost/stratometrics/migrations"
 )
 
 func main() {
-	db := "localhost:9000"
-
-	err := migrations.Up(
-		fmt.Sprintf("clickhouse://%s", db),
-	)
+	db, err := clickhousedb.Open()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	defer db.Close()
 
-	r := router.NewRouter()
-
-	// Run the server
+	r := router.NewRouter(db)
 	if err := r.Run(); err != nil {
 		log.Fatal(err)
 	}

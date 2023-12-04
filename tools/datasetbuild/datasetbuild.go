@@ -20,7 +20,7 @@ const (
 
 var (
 	// Removed "BUILD" from possible states for updates
-	states    = []string{"ACTIVE", "SHUTOFF", "SUSPENDED", "ERROR"}
+	states    = []string{"active", "stopped", "suspened", "error"}
 	startDate = time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 )
 
@@ -52,12 +52,12 @@ func main() {
 		projectID := projects[randGen.Intn(numProjects)] // Randomly pick a project UUID
 		vmID := uuid.New()
 		vmType := fmt.Sprintf("type-%d", randGen.Intn(numTypes)+1)
-		initialStates := []string{"ACTIVE", "BUILD"}
+		initialStates := []string{"active", "building"}
 		state := initialStates[randGen.Intn(len(initialStates))] // Randomly pick initial state
 		image := images[randGen.Intn(numImages)]                 // Randomly pick an image UUID
 		createTime := randomDateAfter(startDate, randGen)
 
-		writeEvent(writer, "CREATED", createTime, projectID, vmID, vmType, state, image)
+		writeEvent(writer, createTime, projectID, vmID, vmType, state, image)
 
 		// If initial state is "BUILD", ensure a follow-up "UPDATE" to "ACTIVE" or "ERROR"
 		lastUpdateTime := createTime
@@ -67,7 +67,7 @@ func main() {
 			if randGen.Float32() < 0.1 { // 10% chance to go to "ERROR"
 				updatedState = "ERROR"
 			}
-			writeEvent(writer, "UPDATED", lastUpdateTime, projectID, vmID, vmType, updatedState, image)
+			writeEvent(writer, lastUpdateTime, projectID, vmID, vmType, updatedState, image)
 			state = updatedState // Update the state to reflect the change
 		}
 
@@ -97,20 +97,24 @@ func main() {
 
 			// Write an update event only if there has been a change
 			if vmType != originalType || state != originalState || image != originalImage {
-				writeEvent(writer, "UPDATED", lastUpdateTime, projectID, vmID, vmType, state, image)
+				writeEvent(writer, lastUpdateTime, projectID, vmID, vmType, state, image)
 			}
 		}
 
 		if randGen.Float32() < 0.9 { // 90% chance of deletion
 			deleteTime := randomDateAfter(lastUpdateTime, randGen)
-			writeEvent(writer, "DELETED", deleteTime, projectID, vmID, vmType, "DELETED", image)
+			writeEvent(writer, deleteTime, projectID, vmID, vmType, "deleted", image)
 		}
 	}
 }
 
-func writeEvent(writer *bufio.Writer, eventType string, timestamp time.Time, projectID, vmID uuid.UUID, vmType, state string, image uuid.UUID) {
-	_, err := writer.WriteString(fmt.Sprintf("%s,%s,%s,%s,%s,%s,%s\n",
-		eventType, timestamp.Format(dateFormat), projectID, vmID, vmType, state, image))
+func writeEvent(writer *bufio.Writer, timestamp time.Time, projectID, vmID uuid.UUID, vmType, state string, image uuid.UUID) {
+	_, err := writer.WriteString(
+		fmt.Sprintf(
+			"%s,%s,%s,%s,%s,%s\n",
+			timestamp.Format(dateFormat), projectID, vmID, vmType, state, image,
+		),
+	)
 	if err != nil {
 		panic(err)
 	}

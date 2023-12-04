@@ -1,0 +1,46 @@
+package clickhousedb
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/ClickHouse/clickhouse-go/v2"
+	"github.com/joho/godotenv"
+	"github.com/vexxhost/stratometrics/internal/clickhousedb/migrations"
+)
+
+type Database struct {
+	Connection clickhouse.Conn
+}
+
+func Open() (*Database, error) {
+	if err := godotenv.Load(); err != nil {
+		return nil, err
+	}
+
+	dsn := os.Getenv("CLICKHOUSE_DSN")
+	db := "stratometrics"
+
+	if err := migrations.Up(fmt.Sprintf("clickhouse://%s/%s", dsn, db)); err != nil {
+		return nil, err
+	}
+
+	conn, err := clickhouse.Open(&clickhouse.Options{
+		Addr: []string{dsn},
+		Auth: clickhouse.Auth{
+			Database: db,
+			// todo: auth
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Database{
+		Connection: conn,
+	}, nil
+}
+
+func (db *Database) Close() error {
+	return db.Connection.Close()
+}

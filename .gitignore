@@ -1,2 +1,3 @@
 testdata/instance_events.csv
 tmp
+.env
