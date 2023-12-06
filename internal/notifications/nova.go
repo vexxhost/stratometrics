@@ -66,17 +66,17 @@ func UnmarshalNovaMessage(body []byte) (*NovaMessage, error) {
 	return &notification, nil
 }
 
-func (n *NovaMessage) GetImageUUID() (*uuid.UUID, error) {
+func (n *NovaMessage) GetImageUUID() (uuid.UUID, error) {
 	u, err := url.Parse(n.Payload.ImageRefURL)
 	if err != nil {
-		return nil, err
+		return uuid.Nil, err
 	}
 
 	imageRef := path.Base(u.Path)
 	imageUUID, err := uuid.Parse(imageRef)
 	if err != nil {
-		return nil, nil
+		return uuid.Nil, nil
 	}
 
-	return &imageUUID, nil
+	return imageUUID, nil
 }

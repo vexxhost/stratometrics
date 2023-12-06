@@ -13,12 +13,12 @@ import (
 )
 
 type InstanceEvent struct {
-	Timestamp time.Time  `ch:"timestamp" json:"timestamp,omitempty"`
-	ProjectID uuid.UUID  `ch:"project_id" json:"project_id,omitempty"`
-	UUID      uuid.UUID  `ch:"uuid" json:"uuid,omitempty"`
-	Type      string     `ch:"type" json:"type,omitempty"`
-	State     string     `ch:"state" json:"state,omitempty"`
-	Image     *uuid.UUID `ch:"image" json:"image,omitempty"`
+	Timestamp time.Time `ch:"timestamp" json:"timestamp,omitempty"`
+	ProjectID uuid.UUID `ch:"project_id" json:"project_id,omitempty"`
+	UUID      uuid.UUID `ch:"uuid" json:"uuid,omitempty"`
+	Type      string    `ch:"type" json:"type,omitempty"`
+	State     string    `ch:"state" json:"state,omitempty"`
+	Image     uuid.UUID `ch:"image" json:"image,omitempty"`
 }
 
 func (ie *InstanceEvent) Equals(other *InstanceEvent) bool {
@@ -172,6 +172,9 @@ func (d *Database) UpsertInstanceEventFromNotification(ctx context.Context, mess
 
 	if dbInstanceEvent.Equals(notificationInstanceEvent) {
 		return nil
+	} else {
+		// print diff
+		fmt.Println(cmp.Diff(dbInstanceEvent, notificationInstanceEvent))
 	}
 
 	if err = d.InsertInstanceEvent(ctx, notificationInstanceEvent); err != nil {
