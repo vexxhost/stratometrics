@@ -1,7 +1,7 @@
 package main
 
 import (
-	"log"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/router"

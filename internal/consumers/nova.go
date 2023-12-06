@@ -2,9 +2,9 @@ package consumers
 
 import (
 	"context"
-	"log"
 	"strings"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/notifications"
 	"github.com/vexxhost/stratometrics/internal/oslo_messaging"

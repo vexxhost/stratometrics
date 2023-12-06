@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
+	"github.com/wagslane/go-rabbitmq"
+
 	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/consumers"
-	"github.com/wagslane/go-rabbitmq"
 )
 
 func main() {
