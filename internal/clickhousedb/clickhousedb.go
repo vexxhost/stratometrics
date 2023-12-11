@@ -6,6 +6,8 @@ import (
 
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/joho/godotenv"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/vexxhost/stratometrics/internal/clickhousedb/migrations"
 )
 
@@ -15,7 +17,7 @@ type Database struct {
 
 func Open() (*Database, error) {
 	if err := godotenv.Load(); err != nil {
-		return nil, err
+		log.WithError(err).Warn("could not load .env file")
 	}
 
 	dsn := os.Getenv("CLICKHOUSE_DSN")

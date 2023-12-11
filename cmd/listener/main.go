@@ -16,7 +16,7 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal(err)
+		log.WithError(err).Warn("could not load .env file")
 	}
 
 	db, err := clickhousedb.Open()
