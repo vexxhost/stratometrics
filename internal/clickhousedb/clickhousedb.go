@@ -20,18 +20,21 @@ func Open() (*Database, error) {
 		log.WithError(err).Warn("could not load .env file")
 	}
 
-	dsn := os.Getenv("CLICKHOUSE_DSN")
+	host := os.Getenv("CLICKHOUSE_HOST")
+	username := os.Getenv("CLICKHOUSE_USERNAME")
+	password := os.Getenv("CLICKHOUSE_PASSWORD")
 	db := "default"
 
-	if err := migrations.Up(fmt.Sprintf("clickhouse://%s/%s", dsn, db)); err != nil {
+	if err := migrations.Up(fmt.Sprintf("clickhouse://%s:%s@%s/%s?x-cluster-name=stratometrics&x-migrations-table-engine=ReplicatedMergeTree", username, password, host, db)); err != nil {
 		return nil, err
 	}
 
 	conn, err := clickhouse.Open(&clickhouse.Options{
-		Addr: []string{dsn},
+		Addr: []string{host},
 		Auth: clickhouse.Auth{
+			Username: username,
+			Password: password,
 			Database: db,
-			// todo: auth
 		},
 	})
 	if err != nil {
