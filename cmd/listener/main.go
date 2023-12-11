@@ -57,12 +57,12 @@ func main() {
 	<-done
 	fmt.Println("stopping consumer")
 
-	// thread 2
+	// TODO: thread 2
 	// check for all non-deleted instances in clickhouse
 	// ensure they are still equiv status in nova
 	// if not, update clickhouse
 
-	// thread 3
+	// TODO: thread 3
 	// i would say check all in nova but we get periodic nova instance exists
 	// health check to make sure we are still getting periodic events
 }
