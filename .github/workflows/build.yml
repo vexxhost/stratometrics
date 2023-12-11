@@ -29,12 +29,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - uses: docker/setup-buildx-action@v3
       - uses: docker/metadata-action@v5
         id: meta
         with:
           images: ghcr.io/vexxhost/stratometrics/${{ matrix.component }}
-      - name: Build and push Docker image
-        uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
+      - uses: docker/build-push-action@v5
         with:
           context: .
           cache-from: type=gha
