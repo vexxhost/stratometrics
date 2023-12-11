@@ -42,7 +42,5 @@ func NewNovaConsumer(db *clickhousedb.Database, conn *rabbitmq.Conn) (*rabbitmq.
 		rabbitmq.WithConsumerOptionsExchangeName("nova"),
 		rabbitmq.WithConsumerOptionsRoutingKey("notifications.info"),
 		rabbitmq.WithConsumerOptionsQueueDurable,
-		// TODO: make sure we pick up one-by-one so we can run multiple replicas
-		// TODO: make sure records dont get lost with queue config
 	)
 }
