@@ -19,7 +19,7 @@ func Open() (*Database, error) {
 	}
 
 	dsn := os.Getenv("CLICKHOUSE_DSN")
-	db := "stratometrics"
+	db := "default"
 
 	if err := migrations.Up(fmt.Sprintf("clickhouse://%s/%s", dsn, db)); err != nil {
 		return nil, err
