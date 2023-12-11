@@ -1,4 +1,4 @@
-CREATE TABLE instance_events (
+CREATE TABLE instance_events_local on cluster '{cluster}' (
     timestamp DateTime,
     project_id UUID,
     uuid UUID,
@@ -16,5 +16,6 @@ CREATE TABLE instance_events (
                'shelved' = 11,
                'shelved_offloaded' = 12),
     image UUID
-) ENGINE = MergeTree()
+) engine = ReplicatedMergeTree('/clickhouse/{installation}/{cluster}/tables/{shard}/{database}/{table}', '{replica}')
+PARTITION BY toYYYYMM(timestamp)
 ORDER BY (project_id, type, state, image, timestamp);
