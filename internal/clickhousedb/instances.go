@@ -33,11 +33,11 @@ func (ie *InstanceEvent) Equals(other *InstanceEvent) bool {
 }
 
 type InstanceUsage struct {
-	ProjectID uuid.UUID `ch:"project_id" json:"project_id,omitempty"`
-	Type      string    `ch:"type" json:"type,omitempty"`
-	State     string    `ch:"state" json:"state,omitempty"`
-	Image     uuid.UUID `ch:"image" json:"image,omitempty"`
-	Usage     int64     `ch:"usage" json:"usage"`
+	ProjectID *uuid.UUID `ch:"project_id" json:"project_id,omitempty"`
+	Type      string     `ch:"type" json:"type,omitempty"`
+	State     string     `ch:"state" json:"state,omitempty"`
+	Image     *uuid.UUID `ch:"image" json:"image,omitempty"`
+	Usage     int64      `ch:"usage" json:"usage"`
 }
 
 func (d *Database) GetInstancesUsageForProject(ctx context.Context, from, to time.Time, projectID string, groupBy []string) ([]InstanceUsage, error) {

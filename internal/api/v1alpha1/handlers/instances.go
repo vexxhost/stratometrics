@@ -28,11 +28,17 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		req.To = time.Date(req.From.Year(), req.From.Month()+1, 1, 0, 0, 0, 0, time.UTC).Add(-time.Nanosecond)
 	}
 
+	projectID, ok := c.Get("project_id")
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing project_id"})
+		return
+	}
+
 	evts, err := db.GetInstancesUsageForProject(
 		c.Request.Context(),
 		req.From,
 		req.To,
-		"94a4e2f8-cb55-4bd4-8df5-0824d34892e3",
+		projectID.(string),
 		req.GroupBy,
 	)
 
