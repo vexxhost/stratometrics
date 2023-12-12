@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
 	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 )
 
@@ -28,9 +29,15 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		req.To = time.Date(req.From.Year(), req.From.Month()+1, 1, 0, 0, 0, 0, time.UTC).Add(-time.Nanosecond)
 	}
 
-	projectID, ok := c.Get("project_id")
+	token, ok := c.Get("token")
 	if !ok {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing project_id"})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing token"})
+		return
+	}
+
+	project, err := token.(tokens.GetResult).ExtractProject()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -38,7 +45,7 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		c.Request.Context(),
 		req.From,
 		req.To,
-		projectID.(string),
+		project.ID,
 		req.GroupBy,
 	)
 

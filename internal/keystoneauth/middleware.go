@@ -33,12 +33,12 @@ func Middleware() gin.HandlerFunc {
 			return
 		}
 
-		projectData, err := tokens.Get(identityClient, token).ExtractProject()
-		if err != nil {
+		tokenData := tokens.Get(identityClient, token)
+		if tokenData.Err != nil {
 			c.AbortWithError(401, err)
 		}
 
-		c.Set("project_id", projectData.ID)
+		c.Set("token", tokenData)
 		c.Next()
 	}
 }
