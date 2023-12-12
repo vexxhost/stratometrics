@@ -37,6 +37,10 @@ of comprehensive billing statements and analytics.
 
 TODO.
 
+## TODO
+
+- Additional billed resources (floating IPs, etc.)
+
 ## Contributing
 
 Your contributions make Stratometrics better. For enhancements, fixes, or other

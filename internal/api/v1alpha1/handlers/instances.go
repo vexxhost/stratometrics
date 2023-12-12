@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -10,9 +11,10 @@ import (
 )
 
 type InstancesRequest struct {
-	From    time.Time `form:"from"`
-	To      time.Time `form:"to"`
-	GroupBy []string  `form:"group_by,default=type"`
+	ProjectID string    `form:"project_id"`
+	From      time.Time `form:"from"`
+	To        time.Time `form:"to"`
+	GroupBy   []string  `form:"group_by,default=type"`
 }
 
 func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
@@ -29,23 +31,59 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		req.To = time.Date(req.From.Year(), req.From.Month()+1, 1, 0, 0, 0, 0, time.UTC).Add(-time.Nanosecond)
 	}
 
-	token, ok := c.Get("token")
+	tokenData, ok := c.Get("token")
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "missing token"})
 		return
 	}
+	token := tokenData.(tokens.GetResult)
 
-	project, err := token.(tokens.GetResult).ExtractProject()
+	project, err := token.ExtractProject()
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
+	}
+	projectId := project.ID
+
+	roles, err := token.ExtractRoles()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	roleNames := []string{}
+	for _, role := range roles {
+		roleNames = append(roleNames, role.Name)
+	}
+
+	if !slices.Contains(roleNames, "member") {
+		c.JSON(http.StatusForbidden, gin.H{"error": "user is not a member of the project"})
+		return
+	}
+
+	if req.ProjectID != "" {
+		if !slices.Contains(roleNames, "admin") {
+			c.JSON(http.StatusForbidden, gin.H{"error": "user is not an admin of the project"})
+			return
+		}
+
+		projectId = req.ProjectID
+	}
+
+	if slices.Contains(req.GroupBy, "project_id") {
+		if !slices.Contains(roleNames, "admin") {
+			c.JSON(http.StatusForbidden, gin.H{"error": "user is not an admin of the project"})
+			return
+		}
+
+		req.ProjectID = ""
 	}
 
 	evts, err := db.GetInstancesUsageForProject(
 		c.Request.Context(),
 		req.From,
 		req.To,
-		project.ID,
+		projectId,
 		req.GroupBy,
 	)
 

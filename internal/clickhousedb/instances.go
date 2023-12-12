@@ -43,6 +43,14 @@ type InstanceUsage struct {
 func (d *Database) GetInstancesUsageForProject(ctx context.Context, from, to time.Time, projectID string, groupBy []string) ([]InstanceUsage, error) {
 	groupByString := strings.Join(groupBy, ", ")
 
+	whereString := ""
+	if projectID != "" {
+		whereString = fmt.Sprintf(`
+		WHERE
+			project_id = '%s'
+		`, projectID)
+	}
+
 	query := fmt.Sprintf(`
 	WITH
 		toDateTime('%d') AS start_time,
@@ -76,12 +84,11 @@ func (d *Database) GetInstancesUsageForProject(ctx context.Context, from, to tim
 			period_end >= start_time AND
 			period_start <= end_range
 	)
-	WHERE
-		project_id = '%s'
+	%s
 	GROUP BY
 		project_id,
 		%s
-	`, from.Unix(), to.Unix(), groupByString, projectID, groupByString)
+	`, from.Unix(), to.Unix(), groupByString, whereString, groupByString)
 
 	var result []InstanceUsage
 	if err := d.Connection.Select(ctx, &result, query); err != nil {
