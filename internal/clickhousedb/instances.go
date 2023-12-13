@@ -40,6 +40,10 @@ type InstanceUsage struct {
 	Usage     int64      `ch:"usage" json:"usage"`
 }
 
+func (iu *InstanceUsage) GetDuration() time.Duration {
+	return time.Duration(iu.Usage) * time.Second
+}
+
 func (d *Database) GetInstancesUsageForProject(ctx context.Context, from, to time.Time, projectID string, groupBy []string) ([]InstanceUsage, error) {
 	groupByString := strings.Join(groupBy, ", ")
 
