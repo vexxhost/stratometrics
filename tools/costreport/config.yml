@@ -1,0 +1,50 @@
+instance_types:
+  m1.amphora:
+  nb.1G:
+    cost: 0.015
+    equivilant:
+      aws:
+        name: t2.micro
+        cost: 0.0159 # t2.micro + 40G EBS
+  nb.4G:
+    cost: 0.06
+    equivilant:
+      aws:
+        name: t2.medium
+        cost: 0.0639 # t2.medium + 160G EBS
+  nb.8G:
+    cost: 0.12
+    equivilant:
+      aws:
+        name: t2.large
+        cost: 0.1278 # t2.large + 320G EBS
+  v1-standard-4:
+    cost: 0.06
+    equivilant:
+      aws:
+        name: t3a.xlarge
+        cost: 0.1613 # t3a.xlarge + 100G EBS
+  v3-starter-2:
+    cost: 0.0212
+    equivilant:
+      aws:
+        name: t3a.medium
+        cost: 0.0397 # t3a.medium + 100G EBS
+  v3-starter-4:
+    cost: 0.0424
+    equivilant:
+      aws:
+        name: m6a.large
+        cost: 0.0907 # m6a.large + 40G EBS
+  v3-starter-32:
+    cost: 0.3392
+    equivilant:
+      aws:
+        name: m7a.4xlarge
+        cost: 0.9799 # m7a.4xlarge + 480G EBS
+  v3-starter-48:
+    cost: 0.5088
+    equivilant:
+      aws:
+        name: m5zn.6xlarge
+        cost: 2.0346 # m5zn.6xlarge + 480G EBS

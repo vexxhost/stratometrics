@@ -17,6 +17,17 @@ type InstancesRequest struct {
 	GroupBy   []string  `form:"group_by,default=type"`
 }
 
+type InstancesPeriodResponse struct {
+	From time.Time `json:"from"`
+	To   time.Time `json:"to"`
+}
+
+type InstancesResponse struct {
+	Period  InstancesPeriodResponse      `json:"period"`
+	Results []clickhousedb.InstanceUsage `json:"results"`
+	Units   string                       `json:"units"`
+}
+
 func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 	var req InstancesRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
@@ -96,12 +107,12 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		evts = []clickhousedb.InstanceUsage{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"period": gin.H{
-			"from": req.From,
-			"to":   req.To,
+	c.JSON(http.StatusOK, InstancesResponse{
+		Period: InstancesPeriodResponse{
+			From: req.From,
+			To:   req.To,
 		},
-		"units":   "seconds",
-		"results": evts,
+		Results: evts,
+		Units:   "seconds",
 	})
 }
