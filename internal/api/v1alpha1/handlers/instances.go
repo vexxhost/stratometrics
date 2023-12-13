@@ -76,7 +76,7 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 			return
 		}
 
-		req.ProjectID = ""
+		projectId = ""
 	}
 
 	evts, err := db.GetInstancesUsageForProject(
