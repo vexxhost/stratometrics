@@ -62,7 +62,7 @@ func main() {
 
 	token := provider.Token()
 
-	projectId := ""
+	projectId := "32f6b15efafe477b9f3f378926069547"
 
 	url := fmt.Sprintf("%s/v1alpha1/instances", os.Getenv("STRATOMETRICS_ENDPOINT"))
 	if projectId != "" {

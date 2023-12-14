@@ -48,3 +48,21 @@ instance_types:
       aws:
         name: m5zn.6xlarge
         cost: 2.0346 # m5zn.6xlarge + 480G EBS
+  v3-standard-4:
+    cost: 0.110
+    equivilant:
+      aws:
+        name: m7a.xlarge
+        cost: 0.23184
+  v3-standard-8:
+    cost: 0.219
+    equivilant:
+      aws:
+        name: m7a.2xlarge
+        cost: 0.46368
+  v3-standard-16:
+    cost: 0.438
+    equivilant:
+      aws:
+        name: m7a.4xlarge
+        cost: 0.92736
