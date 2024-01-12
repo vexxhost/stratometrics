@@ -1,17 +1,17 @@
 package consumers
 
 import (
-	"context"
 	"strings"
 
 	log "github.com/sirupsen/logrus"
-	"github.com/vexxhost/stratometrics/internal/clickhousedb"
+	"github.com/vexxhost/stratometrics/internal/database"
 	"github.com/vexxhost/stratometrics/internal/notifications"
 	"github.com/vexxhost/stratometrics/internal/oslo_messaging"
 	"github.com/wagslane/go-rabbitmq"
+	"gorm.io/gorm"
 )
 
-func NewNovaConsumer(db *clickhousedb.Database, conn *rabbitmq.Conn) (*rabbitmq.Consumer, error) {
+func NewNovaConsumer(db *gorm.DB, conn *rabbitmq.Conn) (*rabbitmq.Consumer, error) {
 	return rabbitmq.NewConsumer(
 		conn,
 		func(d rabbitmq.Delivery) rabbitmq.Action {
@@ -30,7 +30,7 @@ func NewNovaConsumer(db *clickhousedb.Database, conn *rabbitmq.Conn) (*rabbitmq.
 				return rabbitmq.Ack
 			}
 
-			err = db.UpsertInstanceEventFromNotification(context.TODO(), message)
+			err = database.UpsertInstanceEventFromNotification(db, message)
 			if err != nil {
 				log.Println("failed to upsert instance event:", err, message)
 				return rabbitmq.NackRequeue

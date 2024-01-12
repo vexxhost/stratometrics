@@ -1,13 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"math/rand"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/vexxhost/stratometrics/internal/database"
+	"github.com/vexxhost/stratometrics/internal/database/models"
+	"github.com/vexxhost/stratometrics/internal/database/types"
+	"gorm.io/gorm"
 )
 
 const (
@@ -20,7 +22,7 @@ const (
 
 var (
 	// Removed "BUILD" from possible states for updates
-	states    = []string{"active", "stopped", "suspened", "error"}
+	states    = []string{"active", "stopped", "suspended", "error"}
 	startDate = time.Date(2021, 1, 1, 0, 0, 0, 0, time.UTC)
 )
 
@@ -39,14 +41,10 @@ func main() {
 		projects[i] = uuid.New()
 	}
 
-	file, err := os.Create("testdata/instance_events.csv")
+	db, err := database.Open()
 	if err != nil {
 		panic(err)
 	}
-	defer file.Close()
-
-	writer := bufio.NewWriter(file)
-	defer writer.Flush()
 
 	for i := 0; i < numVMs; i++ {
 		projectID := projects[randGen.Intn(numProjects)] // Randomly pick a project UUID
@@ -57,7 +55,7 @@ func main() {
 		image := images[randGen.Intn(numImages)]                 // Randomly pick an image UUID
 		createTime := randomDateAfter(startDate, randGen)
 
-		writeEvent(writer, createTime, projectID, vmID, vmType, state, image)
+		writeEvent(db, createTime, projectID, vmID, vmType, state, image)
 
 		// If initial state is "BUILD", ensure a follow-up "UPDATE" to "ACTIVE" or "ERROR"
 		lastUpdateTime := createTime
@@ -67,7 +65,7 @@ func main() {
 			if randGen.Float32() < 0.1 { // 10% chance to go to "ERROR"
 				updatedState = "ERROR"
 			}
-			writeEvent(writer, lastUpdateTime, projectID, vmID, vmType, updatedState, image)
+			writeEvent(db, lastUpdateTime, projectID, vmID, vmType, updatedState, image)
 			state = updatedState // Update the state to reflect the change
 		}
 
@@ -97,26 +95,30 @@ func main() {
 
 			// Write an update event only if there has been a change
 			if vmType != originalType || state != originalState || image != originalImage {
-				writeEvent(writer, lastUpdateTime, projectID, vmID, vmType, state, image)
+				writeEvent(db, lastUpdateTime, projectID, vmID, vmType, state, image)
 			}
 		}
 
 		if randGen.Float32() < 0.9 { // 90% chance of deletion
 			deleteTime := randomDateAfter(lastUpdateTime, randGen)
-			writeEvent(writer, deleteTime, projectID, vmID, vmType, "deleted", image)
+			writeEvent(db, deleteTime, projectID, vmID, vmType, "deleted", image)
 		}
 	}
 }
 
-func writeEvent(writer *bufio.Writer, timestamp time.Time, projectID, vmID uuid.UUID, vmType, state string, image uuid.UUID) {
-	_, err := writer.WriteString(
-		fmt.Sprintf(
-			"%s,%s,%s,%s,%s,%s\n",
-			timestamp.Format(dateFormat), projectID, vmID, vmType, state, image,
-		),
-	)
-	if err != nil {
-		panic(err)
+func writeEvent(db *gorm.DB, timestamp time.Time, projectID, vmID uuid.UUID, vmType, state string, image uuid.UUID) {
+	instanceEvent := models.InstanceEvent{
+		Timestamp: timestamp,
+		ProjectID: types.BinaryUUID(projectID),
+		UUID:      types.BinaryUUID(vmID),
+		Type:      vmType,
+		State:     models.InstanceState(state),
+		Image:     types.BinaryUUID(image),
+	}
+
+	ret := db.Create(&instanceEvent)
+	if ret.Error != nil {
+		panic(ret.Error)
 	}
 }
 

@@ -7,14 +7,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/gophercloud/gophercloud/openstack/identity/v3/tokens"
-	"github.com/vexxhost/stratometrics/internal/clickhousedb"
+	"gorm.io/gorm"
+
+	"github.com/vexxhost/stratometrics/internal/database"
+	"github.com/vexxhost/stratometrics/internal/database/types"
 )
 
 type InstancesRequest struct {
 	ProjectID string    `form:"project_id"`
 	From      time.Time `form:"from"`
 	To        time.Time `form:"to"`
-	GroupBy   []string  `form:"group_by,default=type"`
+	GroupBy   []string  `form:"group_by,default=type" binding:"dive,oneof=type project_id state image"`
 }
 
 type InstancesPeriodResponse struct {
@@ -23,12 +26,12 @@ type InstancesPeriodResponse struct {
 }
 
 type InstancesResponse struct {
-	Period  InstancesPeriodResponse      `json:"period"`
-	Results []clickhousedb.InstanceUsage `json:"results"`
-	Units   string                       `json:"units"`
+	Period  InstancesPeriodResponse  `json:"period"`
+	Results []database.InstanceUsage `json:"results"`
+	Units   string                   `json:"units"`
 }
 
-func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
+func GetInstanceUsage(c *gin.Context, db *gorm.DB) {
 	var req InstancesRequest
 	if err := c.ShouldBindQuery(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -54,7 +57,7 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-	projectId := project.ID
+	projectId := types.ParseUUID(project.ID)
 
 	roles, err := token.ExtractRoles()
 	if err != nil {
@@ -78,7 +81,7 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 			return
 		}
 
-		projectId = req.ProjectID
+		projectId = types.ParseUUID(req.ProjectID)
 	}
 
 	if slices.Contains(req.GroupBy, "project_id") {
@@ -87,11 +90,13 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 			return
 		}
 
-		projectId = ""
+		projectId = types.EmptyUUID
 	}
 
-	evts, err := db.GetInstancesUsageForProject(
-		c.Request.Context(),
+	projectId = types.ParseUUID("651c7592-6ebc-40f4-9c20-71d43b1e41b1")
+
+	evts, err := database.GetInstancesUsageForProject(
+		db,
 		req.From,
 		req.To,
 		projectId,
@@ -104,7 +109,7 @@ func GetInstanceUsage(c *gin.Context, db *clickhousedb.Database) {
 	}
 
 	if evts == nil {
-		evts = []clickhousedb.InstanceUsage{}
+		evts = []database.InstanceUsage{}
 	}
 
 	c.JSON(http.StatusOK, InstancesResponse{

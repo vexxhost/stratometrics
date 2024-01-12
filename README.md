@@ -17,7 +17,7 @@ to a wealth of data, enabling sophisticated billing models and ensuring fair,
 transparent cost allocation.
 
 Utilizing Golang's performance capabilities, Stratometrics delivers
-high-throughput data collection, while leveraging Clickhouse for its backend
+high-throughput data collection, while leveraging MySQL for its backend
 database to ensure quick processing and retrieval of billing-related data. The
 API provides easy and direct access to usage metrics, supporting the generation
 of comprehensive billing statements and analytics.
@@ -30,7 +30,7 @@ of comprehensive billing statements and analytics.
   OpenStack distribution for immediate use, but works with any OpenStack deployment.
 - **User & administrative API**: Equipped with APIs tailored for both
   user-specific and administrative billing inquiries.
-- **Robust Data Handling**: Backed by Clickhouse, it manages large-scale billing
+- **Robust Data Handling**: Backed by MySQL, it manages large-scale billing
   data with efficiency.
 
 ## Getting Started

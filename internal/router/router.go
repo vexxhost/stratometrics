@@ -2,13 +2,13 @@ package router
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 
 	"github.com/vexxhost/stratometrics/internal/api/v1alpha1"
-	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/keystoneauth"
 )
 
-func NewRouter(db *clickhousedb.Database) *gin.Engine {
+func NewRouter(db *gorm.DB) *gin.Engine {
 	r := gin.Default()
 	r.Use(keystoneauth.Middleware())
 

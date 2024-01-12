@@ -1,16 +1,23 @@
 version: "3.8"
 
 services:
-  clickhouse:
-    image: yandex/clickhouse-server
+  mariadb:
+    image: mariadb
+    environment:
+      MARIADB_ROOT_PASSWORD: admin
     ports:
-      - "9000:9000"
+      - 3306:3306
     volumes:
-      - clickhouse_data:/var/lib/clickhouse
-    ulimits:
-      nofile:
-        soft: 262144
-        hard: 262144
+      - mysql_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    ports:
+      - 9999:80
+    environment:
+      - PMA_ARBITRARY=1
+      - UPLOAD_LIMIT=1G
 
 volumes:
-  clickhouse_data:
+  mysql_data:

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/Rhymond/go-money"
 	"github.com/gophercloud/gophercloud/openstack"
@@ -106,7 +107,7 @@ func main() {
 	totalAwsCost := money.New(0, money.USD)
 
 	for _, usage := range instancesResponse.Results {
-		duration := usage.GetDuration()
+		duration := time.Duration(usage.Usage) * time.Second
 		instanceType := config.InstanceTypes[usage.Type]
 		cost := money.NewFromFloat(instanceType.Cost*duration.Hours(), money.USD)
 		awsCost := money.NewFromFloat(instanceType.Equivilant.AWS.Cost*duration.Hours(), money.USD)

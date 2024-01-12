@@ -10,8 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/wagslane/go-rabbitmq"
 
-	"github.com/vexxhost/stratometrics/internal/clickhousedb"
 	"github.com/vexxhost/stratometrics/internal/consumers"
+	"github.com/vexxhost/stratometrics/internal/database"
 )
 
 func main() {
@@ -19,11 +19,10 @@ func main() {
 		log.WithError(err).Warn("could not load .env file")
 	}
 
-	db, err := clickhousedb.Open()
+	db, err := database.Open()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	conn, err := rabbitmq.NewConn(
 		os.Getenv("NOVA_TRANSPORT_URL"),
@@ -53,16 +52,12 @@ func main() {
 		done <- true
 	}()
 
+	// TODO: thread 2
+	// check for all non-deleted instances in mysql
+	// ensure they are still equiv status in nova
+	// if not, update mysql
+
 	fmt.Println("awaiting signal")
 	<-done
 	fmt.Println("stopping consumer")
-
-	// TODO: thread 2
-	// check for all non-deleted instances in clickhouse
-	// ensure they are still equiv status in nova
-	// if not, update clickhouse
-
-	// TODO: thread 3
-	// i would say check all in nova but we get periodic nova instance exists
-	// health check to make sure we are still getting periodic events
 }
