@@ -1,4 +1,4 @@
-FROM golang:1.21.4 as build-base
+FROM golang:1.21.4@sha256:9baee0edab4139ae9b108fffabb8e2e98a67f0b259fd25283c2a084bd74fea0d as build-base
 COPY go.mod go.sum /go/src/app/
 WORKDIR /go/src/app
 RUN go mod download
