@@ -2,7 +2,7 @@ module github.com/vexxhost/stratometrics
 
 go 1.21
 
-toolchain go1.21.4
+toolchain go1.26.3
 
 require (
 	github.com/Rhymond/go-money v1.0.10
