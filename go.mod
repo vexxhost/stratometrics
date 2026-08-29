@@ -1,8 +1,6 @@
 module github.com/vexxhost/stratometrics
 
-go 1.21
-
-toolchain go1.21.4
+go 1.23
 
 require (
 	github.com/Rhymond/go-money v1.0.10
@@ -12,7 +10,7 @@ require (
 	github.com/gophercloud/gophercloud v1.8.0
 	github.com/joho/godotenv v1.5.1
 	github.com/pterm/pterm v0.12.71
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.10.2
 	github.com/wagslane/go-rabbitmq v0.12.4
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.2
