@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.21.4
 
 require (
-	github.com/Rhymond/go-money v1.0.10
+	github.com/Rhymond/go-money v1.0.15
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.4.0
